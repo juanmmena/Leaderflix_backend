@@ -1,57 +1,29 @@
-const mongoose = require("mongoose");
+const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
 /**
- * Establish a connection to the MongoDB database.
+ * Cliente de Supabase inicializado con las variables de entorno.
+ * Reemplaza la conexión de Mongoose a MongoDB.
  *
- * Uses the connection string provided in the environment variable `MONGO_URI`.
- * On success, logs a confirmation message to the console.
- * On failure, logs the error message and immediately terminates the process
- * wiht exit code 1 to prevent the application form runnnig without a database. 
- * 
- * Notes:
- * - `useNewUrlParser` ensures the new MongoDB connection string parser is used.
- * - `useUnifiedTopology` opts in to the MongoDB driver's new connection management engine.
- * 
- * @async
- * @function connectDB
- * @returns {Promise<void>} Resolves when the connection is established.
- * @throws Will terminate the process if the connection fails.
+ * Variables requeridas en .env:
+ *   SUPABASE_URL  — URL del proyecto, ej: https://xxxx.supabase.co
+ *   SUPABASE_KEY  — service_role key (para uso en backend)
  */
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("Connected to MongoDB");
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error.message);
-    process.exit(1);
-  }
-};
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
 /**
- * Disconnect from the MongoDB database.
- *
- * Gracefully closes the active connection and logs the result to the console.
- * This helps free up resources and ensures the application can safely stop 
- * without leaving open database connections.
- * 
- * If an error occurs during disconnection, it is caught and logged, but the
- * process is not terminated since disconnection errors are not critical.
- *
- * @async
- * @function disconnectDB
- * @returns {Promise<void>} Resolves when the connection is closed.
+ * Verifica que las variables de entorno estén definidas.
+ * Termina el proceso si faltan para evitar errores silenciosos.
  */
-const disconnectDB = async () => {
-  try {
-    await mongoose.disconnect();
-    console.log("Disconnected from MongoDB");
-  } catch (error) {
-    console.error("Error disconnecting from MongoDB:", error.message);
+const connectDB = () => {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+    console.error("❌ Faltan SUPABASE_URL o SUPABASE_KEY en el archivo .env");
+    process.exit(1);
   }
+  console.log("✅ Supabase client inicializado correctamente");
 };
 
-module.exports = { connectDB, disconnectDB };
+module.exports = { supabase, connectDB };

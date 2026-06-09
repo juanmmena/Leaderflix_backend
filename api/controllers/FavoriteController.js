@@ -16,7 +16,6 @@ exports.addFavorite = async (req, res) => {
     const { userId } = req.params;
     const { video_id, image, duration, video_url, user_name } = req.body;
 
-    // Evitar duplicados
     const existing = await favoriteDAO.getFavoriteByUserAndVideo(userId, video_id);
     if (existing) {
       return res.status(400).json({ message: "El video ya está en favoritos" });
